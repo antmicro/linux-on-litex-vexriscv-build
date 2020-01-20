@@ -1,4 +1,6 @@
 BOARD ?= arty
+LOCAL_IP ?= 10.0.0.2
+REMOTE_IP ?= 10.0.0.1
 TFTP_SERVER_DIR=/tftpboot
 
 -include Makefile.local
@@ -72,8 +74,7 @@ br/all:
 	make br/init
 	make br/linux-clean
 	make br/build
-	make vex/clean
-	maek vex/soft
+	make vex/soft
 	make br/tftp
 	make vex/load
 
@@ -112,22 +113,21 @@ LINUX_ON_LITEX_VEXRISCV_PATCH_DIR=${LINUX_ON_LITEX_VEXRISCV_DIR}/buildroot/board
 
 vex/all:
 	make vex/build
-	make vex/clean
 	make vex/soft
 	make vex/tftp
 	make vex/load
 
 vex/build:
-	cd ${LINUX_ON_LITEX_VEXRISCV_DIR}; ./make.py --board=${BOARD} --build
+	cd ${LINUX_ON_LITEX_VEXRISCV_DIR}; ./make.py --board=${BOARD} --local-ip ${LOCAL_IP} --remote-ip ${REMOTE_IP} --build
 
 vex/load:
-	cd ${LINUX_ON_LITEX_VEXRISCV_DIR}; ./make.py --board=${BOARD} --load
+	cd ${LINUX_ON_LITEX_VEXRISCV_DIR}; ./make.py --board=${BOARD} --local-ip ${LOCAL_IP} --remote-ip ${REMOTE_IP} --load
 
 vex/flash:
-	cd ${LINUX_ON_LITEX_VEXRISCV_DIR}; ./make.py --board=${BOARD} --flash
+	cd ${LINUX_ON_LITEX_VEXRISCV_DIR}; ./make.py --board=${BOARD} --local-ip ${LOCAL_IP} --remote-ip ${REMOTE_IP} --flash
 
 vex/soft:
-	cd ${LINUX_ON_LITEX_VEXRISCV_DIR}; ./make.py --board=${BOARD}
+	cd ${LINUX_ON_LITEX_VEXRISCV_DIR}; ./make.py --board=${BOARD} --local-ip ${LOCAL_IP} --remote-ip ${REMOTE_IP}
 
 vex/clean:
 	cd ${LINUX_ON_LITEX_VEXRISCV_DIR}/build; rm -rf *
@@ -153,7 +153,6 @@ linux/apply-patches:
 
 linux/all:
 	make linux/build
-	make vex/clean
 	make vex/soft
 	make linux/tftp
 	make vex/load

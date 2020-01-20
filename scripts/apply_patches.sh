@@ -6,5 +6,5 @@ LINUX_DIR=${LINUX_ON_VEX_BUILD_ROOT_DIR}/linux
 for file in ${PATCH_DIR}/*;
 do
 	echo "Applying ... $file";
-	cd ${LINUX_DIR} && git apply $file
+	cd ${LINUX_DIR} && git apply $file && git add -A && git commit -m "$file"
 done
