@@ -21,7 +21,7 @@ init:
 	make update
 
 update:
-	git submodule update --remote
+	git submodule update --init --remote
 	git submodule foreach 'git submodule update --init --recursive'
 
 ctags:
