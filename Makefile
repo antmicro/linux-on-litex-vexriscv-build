@@ -3,6 +3,7 @@ LOCAL_IP ?= 10.0.0.2
 REMOTE_IP ?= 10.0.0.1
 TFTP_SERVER_DIR=/tftpboot
 
+TOOLS_DIR=${PWD}/tools
 -include Makefile.local
 
 ### HELP ###
@@ -15,9 +16,8 @@ help:
 ### SHORTCUTS ###
 
 init:
-	make toolchain/prerequisites
-	make toolchain/build
-	make toolchain/direnv
+	make toolchain/init
+	make openocd/init
 	make update
 
 update:
@@ -44,9 +44,14 @@ ctags:
 
 ### TOOLCHAIN ###
 
-TOOLCHAIN_DIR=${PWD}/toolchain
+TOOLCHAIN_DIR=${TOOLS_DIR}/toolchain
 RISCV_TOOLCHAIN_DIR=${TOOLCHAIN_DIR}/riscv-gnu-toolchain
 TOOLCHAIN_BUILD_DIR=${TOOLCHAIN_DIR}/build
+
+toolchain/init:
+	make toolchain/prerequisites
+	make toolchain/build
+	make toolchain/direnv
 
 toolchain/prerequisites:
 	sudo apt install autoconf automake autotools-dev curl libmpc-dev \
@@ -54,7 +59,7 @@ toolchain/prerequisites:
                      texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev
 
 toolchain/build:
-	mkdir -p toolchain; mkdir -p ${TOOLCHAIN_BUILD_DIR}
+	mkdir -p ${TOOLCHAIN_DIR}; mkdir -p ${TOOLCHAIN_BUILD_DIR}
 	cd ${TOOLCHAIN_DIR}; git clone --recursive https://github.com/riscv/riscv-gnu-toolchain ${RISCV_TOOLCHAIN_DIR}
 	cd ${RISCV_TOOLCHAIN_DIR}; ./configure --prefix=${TOOLCHAIN_BUILD_DIR}/riscv
 	cd ${RISCV_TOOLCHAIN_DIR}; make -j8
@@ -64,7 +69,29 @@ toolchain/direnv:
 	echo "PATH_add ${TOOLCHAIN_BUILD_DIR}/riscv/bin" > .envrc.local
 	direnv allow .
 
-.PHONY: toolchain/prerequisites toolchain/build toolchain/direnv
+.PHONY: toolchain/init toolchain/prerequisites toolchain/build toolchain/direnv
+
+### OPENOCD ###
+
+OPENOCD_DIR=${TOOLS_DIR}/openocd
+OPENOCD_BUILD_DIR=${OPENOCD_DIR}/src
+
+openocd/init:
+	make openocd/build
+	make openocd/direnv
+
+openocd/build:
+	mkdir -p ${OPENOCD_DIR};
+	cd ${OPENOCD_DIR}; git clone https://github.com/ntfreak/openocd.git .
+	cd ${OPENOCD_DIR}; ./bootstrap
+	cd ${OPENOCD_DIR}; ./configure --enable-ftdi
+	cd ${OPENOCD_DIR}; make -j$(nproc)
+
+openocd/direnv:
+	echo "PATH_add ${OPENOCD_BUILD_DIR}" > .envrc.local
+	direnv allow .
+
+.PHONY: openocd/init openocd/build openocd/direnv
 
 ### BUILDROOT ###
 
@@ -161,7 +188,7 @@ linux/menuconfig:
 	cd ${LINUX_KERNEL_DIR}; make menuconfig
 
 linux/build:
-	cd ${LINUX_KERNEL_DIR}; make -j8
+	cd ${LINUX_KERNEL_DIR}; make -j$(nproc)
 
 linux/clean:
 	cd ${LINUX_KERNEL_DIR}; make clean
