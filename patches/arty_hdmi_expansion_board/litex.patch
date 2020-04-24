@@ -1,0 +1,179 @@
+From 38b104efb0c9bbaf29d88d4a4a8e7cd29f334d07 Mon Sep 17 00:00:00 2001
+From: Robert Winkler <rwinkler@antmicro.com>
+Date: Fri, 24 Apr 2020 23:26:44 +0200
+Subject: [PATCH] Add antmicro HDMI expansion board
+
+---
+ litex.patch                    | 77 ++++++++++++++++++++++++++++++++++
+ litex/boards/platforms/arty.py | 26 ++++++++++++
+ litex/boards/targets/arty.py   | 13 +++++-
+ 3 files changed, 114 insertions(+), 2 deletions(-)
+ create mode 100644 litex.patch
+
+diff --git a/litex.patch b/litex.patch
+new file mode 100644
+index 00000000..90321624
+--- /dev/null
++++ b/litex.patch
+@@ -0,0 +1,77 @@
++From 7a07890110c8db17242c1adf56d4c04a712be42c Mon Sep 17 00:00:00 2001
++From: Robert Winkler <rwinkler@antmicro.com>
++Date: Fri, 24 Apr 2020 23:04:12 +0200
++Subject: [PATCH] Add antmicro HDMI expansion board
++
++---
++ litex/boards/platforms/arty.py | 26 ++++++++++++++++++++++++++
++ litex/boards/targets/arty.py   |  2 ++
++ 2 files changed, 28 insertions(+)
++
++diff --git a/litex/boards/platforms/arty.py b/litex/boards/platforms/arty.py
++index 1e2d8743..3131c3e7 100644
++--- a/litex/boards/platforms/arty.py
+++++ b/litex/boards/platforms/arty.py
++@@ -237,6 +237,31 @@ _connectors = [
++         } ),
++ ]
++ 
+++# Expansion Boards ---------------------------------------------------------------------------------
+++
+++hdmi_usb_expansion_board = [
+++    ("hdmi_out", 0,
+++        Subsignal("data0_p", Pins("pmodc:0"), IOStandard("TMDS_33")),
+++        Subsignal("data0_n", Pins("pmodc:1"), IOStandard("TMDS_33")),
+++        Subsignal("data1_p", Pins("pmodc:2"), IOStandard("TMDS_33")),
+++        Subsignal("data1_n", Pins("pmodc:3"), IOStandard("TMDS_33")),
+++        Subsignal("data2_p", Pins("pmodc:4"), IOStandard("TMDS_33")),
+++        Subsignal("data2_n", Pins("pmodc:5"), IOStandard("TMDS_33")),
+++        Subsignal("clk_p",   Pins("pmodc:6"), IOStandard("TMDS_33")),
+++        Subsignal("clk_n",   Pins("pmodc:7"), IOStandard("TMDS_33")),
+++    ),
+++    ("usb_spi", 0,
+++        Subsignal("clk",  Pins("pmodb:0")),
+++        Subsignal("mosi", Pins("pmodb:1")),
+++        Subsignal("miso", Pins("pmodb:2")),
+++        Subsignal("cs_n", Pins("pmodb:3")),
+++        Subsignal("gpx",  Pins("pmodb:4")),
+++        Subsignal("rst",  Pins("pmodb:5")),
+++        Subsignal("int",  Pins("pmodb:6")),
+++        IOStandard("LVCMOS33"),
+++    ),
+++]
+++
++ # Platform -----------------------------------------------------------------------------------------
++ 
++ class Platform(XilinxPlatform):
++@@ -255,6 +280,7 @@ class Platform(XilinxPlatform):
++             ["write_cfgmem -force -format bin -interface spix4 -size 16 "
++              "-loadbit \"up 0x0 {build_name}.bit\" -file {build_name}.bin"]
++         self.add_platform_command("set_property INTERNAL_VREF 0.675 [get_iobanks 34]")
+++        self.add_extension(hdmi_usb_expansion_board)
++ 
++     def create_programmer(self):
++         return VivadoProgrammer(flash_part="n25q128-3.3v-spi-x1_x2_x4")
++diff --git a/litex/boards/targets/arty.py b/litex/boards/targets/arty.py
++index 8f336838..7982a6d0 100755
++--- a/litex/boards/targets/arty.py
+++++ b/litex/boards/targets/arty.py
++@@ -28,6 +28,7 @@ class _CRG(Module):
++         self.clock_domains.cd_sys2x     = ClockDomain(reset_less=True)
++         self.clock_domains.cd_sys4x     = ClockDomain(reset_less=True)
++         self.clock_domains.cd_sys4x_dqs = ClockDomain(reset_less=True)
+++        self.clock_domains.cd_clk100    = ClockDomain()
++         self.clock_domains.cd_clk200    = ClockDomain()
++         self.clock_domains.cd_eth       = ClockDomain()
++ 
++@@ -40,6 +41,7 @@ class _CRG(Module):
++         pll.create_clkout(self.cd_sys2x,     2*sys_clk_freq)
++         pll.create_clkout(self.cd_sys4x,     4*sys_clk_freq)
++         pll.create_clkout(self.cd_sys4x_dqs, 4*sys_clk_freq, phase=90)
+++        pll.create_clkout(self.cd_clk100,    100e6)
++         pll.create_clkout(self.cd_clk200,    200e6)
++         pll.create_clkout(self.cd_eth,       25e6)
++ 
++-- 
++2.17.1
++
+diff --git a/litex/boards/platforms/arty.py b/litex/boards/platforms/arty.py
+index 1e2d8743..3131c3e7 100644
+--- a/litex/boards/platforms/arty.py
++++ b/litex/boards/platforms/arty.py
+@@ -237,6 +237,31 @@ _connectors = [
+         } ),
+ ]
+ 
++# Expansion Boards ---------------------------------------------------------------------------------
++
++hdmi_usb_expansion_board = [
++    ("hdmi_out", 0,
++        Subsignal("data0_p", Pins("pmodc:0"), IOStandard("TMDS_33")),
++        Subsignal("data0_n", Pins("pmodc:1"), IOStandard("TMDS_33")),
++        Subsignal("data1_p", Pins("pmodc:2"), IOStandard("TMDS_33")),
++        Subsignal("data1_n", Pins("pmodc:3"), IOStandard("TMDS_33")),
++        Subsignal("data2_p", Pins("pmodc:4"), IOStandard("TMDS_33")),
++        Subsignal("data2_n", Pins("pmodc:5"), IOStandard("TMDS_33")),
++        Subsignal("clk_p",   Pins("pmodc:6"), IOStandard("TMDS_33")),
++        Subsignal("clk_n",   Pins("pmodc:7"), IOStandard("TMDS_33")),
++    ),
++    ("usb_spi", 0,
++        Subsignal("clk",  Pins("pmodb:0")),
++        Subsignal("mosi", Pins("pmodb:1")),
++        Subsignal("miso", Pins("pmodb:2")),
++        Subsignal("cs_n", Pins("pmodb:3")),
++        Subsignal("gpx",  Pins("pmodb:4")),
++        Subsignal("rst",  Pins("pmodb:5")),
++        Subsignal("int",  Pins("pmodb:6")),
++        IOStandard("LVCMOS33"),
++    ),
++]
++
+ # Platform -----------------------------------------------------------------------------------------
+ 
+ class Platform(XilinxPlatform):
+@@ -255,6 +280,7 @@ class Platform(XilinxPlatform):
+             ["write_cfgmem -force -format bin -interface spix4 -size 16 "
+              "-loadbit \"up 0x0 {build_name}.bit\" -file {build_name}.bin"]
+         self.add_platform_command("set_property INTERNAL_VREF 0.675 [get_iobanks 34]")
++        self.add_extension(hdmi_usb_expansion_board)
+ 
+     def create_programmer(self):
+         return VivadoProgrammer(flash_part="n25q128-3.3v-spi-x1_x2_x4")
+diff --git a/litex/boards/targets/arty.py b/litex/boards/targets/arty.py
+index 8f336838..c2cdd4db 100755
+--- a/litex/boards/targets/arty.py
++++ b/litex/boards/targets/arty.py
+@@ -28,14 +28,18 @@ class _CRG(Module):
+         self.clock_domains.cd_sys2x     = ClockDomain(reset_less=True)
+         self.clock_domains.cd_sys4x     = ClockDomain(reset_less=True)
+         self.clock_domains.cd_sys4x_dqs = ClockDomain(reset_less=True)
++        self.clock_domains.cd_clk100    = ClockDomain()
+         self.clock_domains.cd_clk200    = ClockDomain()
+         self.clock_domains.cd_eth       = ClockDomain()
+ 
+         # # #
+ 
++        platform_reset  = platform.request("cpu_reset")
++        platform_clk100 = platform.request("clk100")
++
+         self.submodules.pll = pll = S7PLL(speedgrade=-1)
+-        self.comb += pll.reset.eq(~platform.request("cpu_reset"))
+-        pll.register_clkin(platform.request("clk100"), 100e6)
++        self.comb += pll.reset.eq(~platform_reset)
++        pll.register_clkin(platform_clk100, 100e6)
+         pll.create_clkout(self.cd_sys,       sys_clk_freq)
+         pll.create_clkout(self.cd_sys2x,     2*sys_clk_freq)
+         pll.create_clkout(self.cd_sys4x,     4*sys_clk_freq)
+@@ -43,6 +47,11 @@ class _CRG(Module):
+         pll.create_clkout(self.cd_clk200,    200e6)
+         pll.create_clkout(self.cd_eth,       25e6)
+ 
++        self.submodules.pll2 = pll2 = S7PLL(speedgrade=-1)
++        self.comb += pll2.reset.eq(~platform_reset)
++        pll2.register_clkin(platform_clk100, 100e6)
++        pll2.create_clkout(self.cd_clk100,    100e6)
++
+         self.submodules.idelayctrl = S7IDELAYCTRL(self.cd_clk200)
+ 
+         self.comb += platform.request("eth_ref_clk").eq(self.cd_eth.clk)
+-- 
+2.17.1
+

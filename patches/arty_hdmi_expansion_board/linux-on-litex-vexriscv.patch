@@ -1,0 +1,25 @@
+From ba0536f3db1129bbf7efb8579da7c98ef383cdba Mon Sep 17 00:00:00 2001
+From: Robert Winkler <rwinkler@antmicro.com>
+Date: Fri, 24 Apr 2020 23:28:14 +0200
+Subject: [PATCH] Add framebuffer to arty board
+
+---
+ make.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/make.py b/make.py
+index 3b97d50..7308fb0 100755
+--- a/make.py
++++ b/make.py
+@@ -32,7 +32,7 @@ class Arty(Board):
+     def __init__(self):
+         from litex_boards.targets import arty
+         Board.__init__(self, arty.BaseSoC, {"serial", "ethernet", "spiflash", "leds", "rgb_led",
+-            "switches", "spi", "i2c", "xadc", "icap_bitstream", "mmcm"})
++            "switches", "spi", "i2c", "xadc", "icap_bitstream", "mmcm", "framebuffer"})
+ 
+     def load(self):
+         from litex.build.openocd import OpenOCD
+-- 
+2.17.1
+
