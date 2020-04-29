@@ -33,7 +33,7 @@ index 00000000..90321624
 +@@ -237,6 +237,31 @@ _connectors = [
 +         } ),
 + ]
-+ 
++
 ++# Expansion Boards ---------------------------------------------------------------------------------
 ++
 ++hdmi_usb_expansion_board = [
@@ -60,14 +60,14 @@ index 00000000..90321624
 ++]
 ++
 + # Platform -----------------------------------------------------------------------------------------
-+ 
++
 + class Platform(XilinxPlatform):
 +@@ -255,6 +280,7 @@ class Platform(XilinxPlatform):
 +             ["write_cfgmem -force -format bin -interface spix4 -size 16 "
 +              "-loadbit \"up 0x0 {build_name}.bit\" -file {build_name}.bin"]
 +         self.add_platform_command("set_property INTERNAL_VREF 0.675 [get_iobanks 34]")
 ++        self.add_extension(hdmi_usb_expansion_board)
-+ 
++
 +     def create_programmer(self):
 +         return VivadoProgrammer(flash_part="n25q128-3.3v-spi-x1_x2_x4")
 +diff --git a/litex/boards/targets/arty.py b/litex/boards/targets/arty.py
@@ -81,7 +81,7 @@ index 00000000..90321624
 ++        self.clock_domains.cd_clk100    = ClockDomain()
 +         self.clock_domains.cd_clk200    = ClockDomain()
 +         self.clock_domains.cd_eth       = ClockDomain()
-+ 
++
 +@@ -40,6 +41,7 @@ class _CRG(Module):
 +         pll.create_clkout(self.cd_sys2x,     2*sys_clk_freq)
 +         pll.create_clkout(self.cd_sys4x,     4*sys_clk_freq)
@@ -89,8 +89,8 @@ index 00000000..90321624
 ++        pll.create_clkout(self.cd_clk100,    100e6)
 +         pll.create_clkout(self.cd_clk200,    200e6)
 +         pll.create_clkout(self.cd_eth,       25e6)
-+ 
-+-- 
++
++--
 +2.17.1
 +
 diff --git a/litex/boards/platforms/arty.py b/litex/boards/platforms/arty.py
@@ -100,7 +100,7 @@ index 1e2d8743..3131c3e7 100644
 @@ -237,6 +237,31 @@ _connectors = [
          } ),
  ]
- 
+
 +# Expansion Boards ---------------------------------------------------------------------------------
 +
 +hdmi_usb_expansion_board = [
@@ -127,14 +127,14 @@ index 1e2d8743..3131c3e7 100644
 +]
 +
  # Platform -----------------------------------------------------------------------------------------
- 
+
  class Platform(XilinxPlatform):
 @@ -255,6 +280,7 @@ class Platform(XilinxPlatform):
              ["write_cfgmem -force -format bin -interface spix4 -size 16 "
               "-loadbit \"up 0x0 {build_name}.bit\" -file {build_name}.bin"]
          self.add_platform_command("set_property INTERNAL_VREF 0.675 [get_iobanks 34]")
 +        self.add_extension(hdmi_usb_expansion_board)
- 
+
      def create_programmer(self):
          return VivadoProgrammer(flash_part="n25q128-3.3v-spi-x1_x2_x4")
 diff --git a/litex/boards/targets/arty.py b/litex/boards/targets/arty.py
@@ -148,9 +148,9 @@ index 8f336838..c2cdd4db 100755
 +        self.clock_domains.cd_clk100    = ClockDomain()
          self.clock_domains.cd_clk200    = ClockDomain()
          self.clock_domains.cd_eth       = ClockDomain()
- 
+
          # # #
- 
+
 +        platform_reset  = platform.request("cpu_reset")
 +        platform_clk100 = platform.request("clk100")
 +
@@ -165,15 +165,15 @@ index 8f336838..c2cdd4db 100755
 @@ -43,6 +47,11 @@ class _CRG(Module):
          pll.create_clkout(self.cd_clk200,    200e6)
          pll.create_clkout(self.cd_eth,       25e6)
- 
+
 +        self.submodules.pll2 = pll2 = S7PLL(speedgrade=-1)
 +        self.comb += pll2.reset.eq(~platform_reset)
 +        pll2.register_clkin(platform_clk100, 100e6)
 +        pll2.create_clkout(self.cd_clk100,    100e6)
 +
          self.submodules.idelayctrl = S7IDELAYCTRL(self.cd_clk200)
- 
+
          self.comb += platform.request("eth_ref_clk").eq(self.cd_eth.clk)
--- 
+--
 2.17.1
 

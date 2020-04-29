@@ -7,15 +7,7 @@
 
 1. Apply patches:
 ```
-cd <linux-on-vex-build>/litex-boards/
-git apply ../patches/arty_hdmi_expansion_board/litex-boards.patch
-
-cd <linux-on-vex-build>/litex/
-git apply ../patches/arty_hdmi_expansion_board/litex.patch
-
-
-cd <linux-on-vex-build>/linux-on-litex-vexriscv/
-git apply ../patches/arty_hdmi_expansion_board/linux-on-litex-vexriscv.patch
+make apply-patches
 ```
 
 2. Prepare repository:
