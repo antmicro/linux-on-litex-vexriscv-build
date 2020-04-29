@@ -66,7 +66,7 @@ toolchain/build:
 	cd ${RISCV_TOOLCHAIN_DIR}; make -j8 linux
 
 toolchain/direnv:
-	echo "PATH_add ${TOOLCHAIN_BUILD_DIR}/riscv/bin" > .envrc.local
+	echo "PATH_add ${TOOLCHAIN_BUILD_DIR}/riscv/bin" >> .envrc.local
 	direnv allow .
 
 .PHONY: toolchain/init toolchain/prerequisites toolchain/build toolchain/direnv
@@ -88,7 +88,7 @@ openocd/build:
 	cd ${OPENOCD_DIR}; make -j$(nproc)
 
 openocd/direnv:
-	echo "PATH_add ${OPENOCD_BUILD_DIR}" > .envrc.local
+	echo "PATH_add ${OPENOCD_BUILD_DIR}" >> .envrc.local
 	direnv allow .
 
 .PHONY: openocd/init openocd/build openocd/direnv
