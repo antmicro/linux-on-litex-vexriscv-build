@@ -18,6 +18,7 @@ help:
 init:
 	make toolchain/init
 	make openocd/init
+	make xc3sprog/init
 	make update
 
 update:
@@ -92,6 +93,38 @@ openocd/direnv:
 	direnv allow .
 
 .PHONY: openocd/init openocd/build openocd/direnv
+
+### XC3SPROG ###
+
+XC3SPROG_DIR=${TOOLS_DIR}/xc3sprog
+XC3SPROG_BUILD_DIR=${XC3SPROG_DIR}/build
+LIBFTD2XX_DIR=${TOOLS_DIR}/libftd2xx
+
+xc3sprog/init:
+	make xc3sprog/prerequisites
+	make xc3sprog/build
+	make xc3sprog/direnv
+
+xc3sprog/prerequisites:
+	sudo apt install -y libusb-dev libftdi-dev cmake
+	mkdir -p ${LIBFTD2XX_DIR}
+	cd ${LIBFTD2XX_DIR}; wget https://www.ftdichip.com/Drivers/D2XX/Linux/libftd2xx-i386-1.4.8.gz
+	cd ${LIBFTD2XX_DIR}; tar -xzf libftd2xx-i386-1.4.8.gz
+	cd ${LIBFTD2XX_DIR}; cd release/build && \
+        sudo cp libftd2xx.* /usr/local/lib && \
+        sudo chmod 0755 /usr/local/lib/libftd2xx.so.1.4.8 && \
+        sudo ln -sf /usr/local/lib/libftd2xx.so.1.4.8 /usr/local/lib/libftd2xx.so
+
+xc3sprog/build:
+	mkdir -p ${XC3SPROG_DIR}
+	cd ${XC3SPROG_DIR}; git clone --recursive https://github.com/rw1nkler/xc3sprog .
+	mkdir -p ${XC3SPROG_BUILD_DIR};
+	cd ${XC3SPROG_BUILD_DIR}; cmake ..
+	cd ${XC3SPROG_BUILD_DIR}; make
+
+xc3sprog/direnv:
+	echo "PATH_add ${XC3SPROG_BUILD_DIR}" >> .envrc.local
+	direnv allow .
 
 ### BUILDROOT ###
 

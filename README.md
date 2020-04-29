@@ -36,6 +36,7 @@ make init
 
 The command will install the following tools to the `tools/` directory:
 - riscv toolchain
+- xc3sprog
 - openocd
 
 For selective installation, see the `Makefile`.
